@@ -1,0 +1,111 @@
+\documentclass[lang=en,color=blue,mode=fancy,titlestyle=hang]{elegantbook}
+
+% ---- Title Information ----
+% with lang=en the class does not load ctex, and any Chinese in the body renders as blank.
+% If you really need Chinese text, add \usepackage{xeCJK} and \setCJKmainfont{...}.
+\title{Title of the Tutorial}
+\author{Oct0pu5}
+\date{Jan 1st, 2027}
+\version{1.0}
+\extrainfo{``A short quotation, printed at the foot of the title page.''}
+\cover{cover.pdf}
+
+% ---- Additional Packages ----
+% Only what you actually use. The class already loads amsmath, graphicx, hyperref, xcolor,
+% listings and more, so do not repeat those.
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{tikz}
+
+% ---- Math Operators ----
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+% ---- Figure captions ----
+% Suppresses the "Figure N:" prefix. No figure in these tutorials is ever cross-referenced,
+% so the number carries no information. This line is easy to lose when a preamble is
+% rewritten, because it is not attached to any \usepackage.
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
+
+% ---- Table of contents ----
+% Entries at body size, opened up with leading. Enlarging the font instead makes the page
+% look bulky; spacing fills it without shouting.
+\setlength{\cftbeforechapskip}{1.1em}
+\setlength{\cftbeforesecskip}{0.5em}
+\setlength{\cftbeforesubsecskip}{0.15em}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+\tableofcontents
+
+\mainmatter
+
+% ============================================================
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+
+% Wider leading for the Preface. Note that the class sets \baselinestretch to 1.2, not 1,
+% so the reset below has to be 1.2. Writing 1 tightens the whole book.
+\linespread{1.55}\selectfont
+
+Write why you took this subject on, whose course or book the tutorial follows, who it is
+for, and one piece of advice for the reader.
+
+\linespread{1.2}\selectfont
+
+% ============================================================
+\chapter{First Chapter}
+
+\subsection*{Overview}
+
+% Three short paragraphs. Measure before you write, rather than after: the target is this
+% document's own average sentence length, not another tutorial's. To measure it:
+%
+%   detex() { sed -e 's/\\[a-zA-Z]*//g' -e 's/[${}\\]//g' | tr '\n' ' '; }
+%   w=$(detex < file.tex | wc -w); s=$(detex < file.tex | grep -oE '[.!?] ' | wc -l)
+%   echo $((w / s))
+%
+% Around eighteen words per sentence is the house style. Em-dashes are rare, semicolons
+% rarer still.
+%
+%   Paragraph 1: what problem the chapter solves, and why it sits here.
+%   Paragraph 2: what it actually contains.
+%   Paragraph 3: how it connects to the chapters around it.
+
+Say what problem this chapter solves and why it comes here.
+
+Say what the chapter actually contains.
+
+Say how it connects to the chapters around it.
+
+\section{First Section}
+
+Body text.
+
+\subsection{A Subsection}
+
+Body text.
+
+% ============================================================
+\chapter*{Afterwords}
+\addcontentsline{toc}{chapter}{Afterwords}
+
+\linespread{1.55}\selectfont
+
+Write what writing the tutorial taught you, what you could not cover, and any advice for a
+reader who wants to write their own notes.
+
+\begin{flushright}
+  Oct0pu5\\
+  Jan 1st, 2027
+\end{flushright}
+
+\end{document}
