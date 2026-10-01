@@ -103,7 +103,27 @@ loads `ctex` and `fontspec`.
 | `.latexmkrc` | makes a bare `latexmk` build correctly |
 | `.gitignore` | the twelve build artifacts, plus the built PDF |
 | `elegantbook.cls` | the document class. **It must travel with the repository** — it is not installed on the system |
+| `CLAUDE.md` | the revision guide, for working on an existing tutorial rather than a new one |
 | `LICENSE` | CC BY-SA 4.0 |
+
+---
+
+## Revising an existing tutorial
+
+The body prose is written by hand. `CLAUDE.md` is for working on what is already there:
+restructuring, copyediting, and bringing a document up to the standard.
+
+Copy it into the repository you are revising:
+
+```bash
+cp CLAUDE.md "/path/to/Some-Tutorial/CLAUDE.md"
+```
+
+It records the standard every tutorial conforms to, the ten-step revision procedure, how to
+measure whether new prose matches the author's voice, and every trap the migrations have hit
+so far — the lost `\captionsetup`, the missed `\paragraph` level, the leftover `\newpage`
+after each chapter, the Chinese that renders as blank. With it sitting in the repository,
+those rules load automatically and do not have to be restated.
 
 ---
 
