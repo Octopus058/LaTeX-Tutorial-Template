@@ -300,6 +300,97 @@ And when something looks wrong in the output, **render it and look** — `pdftot
 extraction loses spaces and can make a layout bug look like a text-extraction artifact,
 and vice versa.
 
+### 0.5 What `elegantbook` actually provides
+
+`elegantbook` ships a fixed set of environments. **There is no `tip`, `important` or
+`caution`** — those belong to other classes and error out here. Enumerate before
+recommending anything:
+
+```bash
+grep -oE '\\newenvironment\{[a-zA-Z]+\}' elegantbook.cls | sort -u
+```
+
+| Kind | Environments | Renders as |
+| --- | --- | --- |
+| **Boxed, numbered** (tcolorbox) | `theorem` `definition` `postulate` `axiom` `corollary` `lemma` `proposition` | coloured frame, title tab top-left, suit symbol bottom-right |
+| **Counted, inline** | `example` `exercise` `problem` | bold label plus number, no frame |
+| **Unnumbered, inline** | `note` `remark` `assumption` `conclusion` `property` `solution` `proof` `custom` | bold label only |
+
+The boxed set comes in three colours by style: `defstyle` (definition) green, `thmstyle`
+(theorem, lemma, corollary, axiom, postulate) orange, `prostyle` (proposition) blue. The
+suit symbol follows the style — clubs for definitions, hearts for theorems, spades for
+propositions. Any of them takes an optional bracket title, and `\begin{lemma}[Log-sum
+inequality]` renders as "Lemma 1.1 (Log-sum inequality)".
+
+**Each type has its own counter.** `\ELEGANT@usesamecnt` is off unless the class is
+loaded with that option, so `definition`, `theorem` and `lemma` all number independently
+from 1.1 within a chapter. Do not assume a shared sequence: five different environments
+in one test file all printed "1.1".
+
+Two traps inside these:
+
+- **`proof` prints no QED symbol.** The class comments the line out
+  (`% \hfill$\Box$\quad`, cls line 1193), so `\begin{proof}...\end{proof}` ends with
+  nothing at all. Add `\hfill$\Box$` by hand if the book wants one, and settle on □ or
+  ∎ once rather than mixing them.
+- **`note` and `remark` are near-identical.** `note` hangs a red dingbat in the margin
+  and sets the body italic; `remark` is a plain bold label with a roman body. Pick one
+  and stay with it.
+
+**Use them sparingly, and demo before adopting.** Wrapping every definition in a box
+turns a chapter into a stack of coloured rectangles and breaks the prose into fragments.
+One measured case: 20 environments across a single chapter put 7 label blocks on one
+page. Render a sample page first and look at it before committing book-wide.
+
+The set that earns a box is the **spine** — the few definitions the chapter is built on,
+plus any named result a later chapter will cite. Lists of properties are not that: a
+lead-in sentence and an `itemize` already say it, and the boxed label adds a count but no
+information. Worse, these environments have **no terminator**, so a paragraph following
+one reads as though it were still inside it. Reaching for an environment is the right
+instinct; reaching for twenty is not.
+
+### 0.6 Figure cross-references
+
+Use the class's own macro, `\figref{...}`, rather than a hand-rolled `Figure~\ref{...}`.
+It is defined in the `lang=en` branch as `\textbf{Figure}~\ref{#1}` (cls line 458), so the
+word is typeset bold without being repeated in the source.
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{assets/.../foo.png}
+  \caption{Caption text}
+  \label{fig:short-name}
+\end{figure}
+```
+
+**The starter kit's preamble used to fight this.** It shipped
+
+```latex
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
+```
+
+which suppresses the "Figure N:" prefix. The caption then reads "Caption text" while the
+body says "Figure 1.2" — a cross-reference pointing at a number that appears nowhere on
+the page. The mismatch is easy to miss because the reference itself resolves without
+error; only the caption is wrong.
+
+**Both lines are gone from the template as of 2026-10-09.** Numbered captions and working
+`\figref` references are the house standard, so no tutorial keeps `labelformat=empty` any
+longer. Dropping the pair changes nothing else: the caption still renders, the reference
+still resolves, and the page count is unchanged.
+
+Two things this leaves behind:
+
+- **§2 still recommends preserving `\captionsetup[figure]{labelformat=empty}`** during a
+  `ctexart` migration, using it as the example of a setting that is easy to lose. The
+  lesson about auditing non-package preamble lines stands, but the specific advice now
+  contradicts this section. §2 carries an inline note until it is rewritten.
+- **The four finished tutorials still ship the line.** It is harmless where nothing is
+  cross-referenced, so this is a consistency debt rather than a bug. Fix each one the next
+  time it is touched, rather than in a sweep.
+
 ---
 
 ## 1. Standard revision (the v1.0 → v1.1 treatment)
@@ -508,15 +599,22 @@ Migration notes:
   unavailable here.
 - **Audit the old preamble for functional settings, not just packages.** A package list is
   easy to carry across; a bare configuration line is easy to drop. The one missed on both
-  migrations so far is
+  migrations so far was
 
   ```latex
   \captionsetup[figure]{labelformat=empty}
   ```
 
   which sits on its own line with no `\usepackage` above it, and which suppresses the
-  "Figure N:" prefix on captions. Losing it silently relabels every figure in the book.
-  Before replacing a preamble, list its non-package lines and account for each one:
+  "Figure N:" prefix on captions. Losing it silently relabeled every figure in the book.
+
+  **Superseded as of 2026-10-09 — see §0.6.** The house now wants numbered captions so
+  that `\figref` resolves, so on the next migration this line should be **dropped**, along
+  with the `\usepackage{caption}` above it. The paragraph still earns its place as the
+  example, because a functional setting with no package header of its own is exactly the
+  kind that goes missing. Keep the practice of auditing for such lines; drop only this
+  instance of it. Before replacing a preamble, list its non-package lines and account for
+  each one:
 
   ```bash
   grep -nE '^\\(renewcommand|newcommand|captionsetup|hypersetup|setlength|titleformat|patchcmd|newenvironment)' old.tex
@@ -566,7 +664,7 @@ Do this as its own commit, before or after the standard revision — not mixed i
 
 ## 3. Per-repo status
 
-Updated 2026-10-01. The first row is the standard; every other row is a target brought up
+Updated 2026-10-09. The first row is the standard; every other row is a target brought up
 to it.
 
 | Repo | State |
@@ -576,7 +674,7 @@ to it.
 | **Introduction-to-Compressed-Sensing** | ✅ v2.1 done, migrated from `ctexart`, 60 pages; commit titles cleaned; tag `v2.1` re-pointed at the real v2.1 commit; release body may still be a placeholder |
 | **Retracing-the-Path-of-Linear-Algebra** | ✅ v1.1 done, migrated, new TikZ cover, 38 pages; commit titles cleaned; tag and Release not yet created |
 | **LaTeX-Tutorial-Template** | ✅ created and pushed 2026-10-01 — the starter kit for new tutorials |
-| **China-University-of-Petroleum-Dining-Guide** | ⬜ 141 MB; not yet decided whether it counts as a tutorial |
+| **Introduction-to-Information-Theory** | ⬜ started 2026-10-07 from the template; Chapter 1 drafted. No `.git` yet, deferred until the body is written. First tutorial to use numbered figure captions and `\figref` references, which became the **house standard on 2026-10-09** (see §0.6). The four finished tutorials still ship `\captionsetup[figure]{labelformat=empty}` and should be updated as each is next touched |
 
 **Two questions still unsettled**, both raised by the Compressed Sensing and Linear
 Algebra migrations and left open on purpose:
@@ -637,6 +735,21 @@ matching every line; `sed -i` converting CRLF to LF and turning a 13-line diff i
 **Write the logic to a script file** (`Write` tool) and run `perl script.pl <in >out`.
 Prefer the `Grep` tool over `grep` for patterns with escapes. Verify counts against an
 independent measure.
+
+### The tilde is not a tilde, and `pdftotext` cannot see it
+
+In LaTeX source, `~` is an **active character** — a non-breaking space. Writing
+`$(X, Y) ~ p(x, y)$` intending "is distributed as" produces `(X,Y) p(x,y)`: the tilde
+**vanishes silently**, no error, no warning. The markup is `\sim`, and the same confusion
+waits in any language that uses the symbol for asymptotic equivalence.
+
+**Do not try to confirm it with `pdftotext`.** Math symbols are only partially
+extractable, and `\sim` is one of the ones that is not: the correct `\sim` came out as
+two blank spaces, which reads exactly like the broken `~`. The two states are
+indistinguishable from the text layer. Render the page and look — this is the same trap
+as the `\captionsetup` case in §0.6, in the opposite direction: there a real layout
+change looked like an extraction artifact, here a correct symbol looked like a missing
+one.
 
 ### Line endings
 
