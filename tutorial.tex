@@ -1,30 +1,166 @@
-\documentclass[lang=en,color=blue,mode=fancy,titlestyle=hang]{elegantbook}
+\documentclass[10pt,a4paper,oneside,numbers=noenddot]{scrbook}
 
 % ---- Title Information ----
 \title{Title of the Tutorial}
-\author{Oct0pu5}
+\author{Lancet Ross}
 \date{Jan 1st, 2027}
-\version{1.0}
-\extrainfo{``A short quotation, printed at the foot of the title page.''}
-\cover{cover.pdf}
+\newcommand*{\bookversion}{1.0}
+\newcommand*{\bookquote}{``A short quotation, printed at the foot of the title page.''}
 
-% ---- Additional Packages ----
-\usepackage{array}
+% ---- Fonts ----
+% Text in TeX Gyre Termes and maths in Computer Modern, the pairing the book already used.
+\usepackage{fontspec}
+\setmainfont{TeXGyreTermesX}
+\setsansfont{texgyreheros}
+
+% ---- Page layout ----
+\usepackage[a4paper]{geometry}
+\geometry{margin=25.4mm}
+% One inch all round leaves a 159mm measure, and some paragraphs carry inline maths with no
+% breakpoint in them.
+% Allow slightly looser lines first, then a third pass with emergency stretch, rather than
+% push a formula into the margin.
+\tolerance=1000
+\setlength{\emergencystretch}{3em}
+\linespread{1.2}
+
+% ---- Packages ----
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
 \usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{mleftright}
+\mleftright
+\usepackage[
+  backend=biber,
+  style=numeric-comp
+]{biblatex}
+\addbibresource{refs.bib}
+\usepackage[headsepline]{scrlayer-scrpage}
+\usepackage[hidelinks]{hyperref}
+% scrbook, like book, sets \@afterindentfalse, so the first paragraph after a heading sits
+% flush with the margin while every later one is indented. These tutorials have always
+% indented it, so the package has to be named here or the look is lost the next time the
+% class is replaced.
+\usepackage{indentfirst}
+
+\usepackage{array}
 \usepackage{float}
 \usepackage{wrapfig}
 \usepackage{tabularx}
-\usepackage{enumitem}
-\usepackage{tikz}
+
+% ---- Running heads ----
+% The section title sits above a thin rule on the right, the page number at the foot.
+\pagestyle{scrheadings}
+\clearpairofpagestyles
+\automark{section}
+\ohead{\headmark}
+\cfoot*{\pagemark}
+% The running head carries a section title on top of a rule, and the foot a page
+% number; both need more room than one baseline, which KOMA warns about when they do not get it.
+\setlength{\headheight}{30pt}
+\setlength{\footheight}{20pt}
+% Content runs short of the lower edge more often than a book with no floats would, and
+% flush bottom then stretches every page to the same depth.
+\raggedbottom
+
+% ---- Spacing in the table of contents ----
+\RedeclareSectionCommand[tocbeforeskip=1.1em]{chapter}
+\RedeclareSectionCommand[tocbeforeskip=0.5em]{section}
+\RedeclareSectionCommand[tocbeforeskip=0.15em]{subsection}
 
 % ---- Math Operators ----
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\Vol}{Vol}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\tr}{tr}
 
-% ---- Table of contents ----
-\setlength{\cftbeforechapskip}{1.1em}
-\setlength{\cftbeforesecskip}{0.5em}
-\setlength{\cftbeforesubsecskip}{0.15em}
+% ---- Cross-references ----
+\newcommand*{\figref}[1]{\textbf{Figure}~\ref{#1}}
+\newcommand*{\tabref}[1]{\textbf{Table}~\ref{#1}}
+
+% ---- Theorem-like environments, set the way Cover and Thomas set theirs ----
+% A run-in bold head, a full stop after the number, and nothing else around it.
+% Definitions, examples and remarks set their body roman; results set it italic, and carry
+% a very light grey panel so they can be found by flipping through the book.
+% A panel with no rule and no title bar: a very light grey fill that keeps the black-and-white
+% look while telling a result apart from the prose around it.
+\tcbset{
+  ctresult/.style={
+    breakable,
+    colback=black!4, colframe=black!4,
+    boxrule=0pt, arc=0pt, outer arc=0pt,
+    % The text inside the panel has to sit on the same left edge as the prose outside
+    % it, so the panel carries no side padding at all: it spans the measure exactly and
+    % the grey band reads as a highlighted paragraph. Vertical padding stays, because a
+    % band that clips the ascenders looks like a mistake.
+    boxsep=0pt, left=0pt, right=0pt, top=5pt, bottom=5pt,
+    before skip=0.9em, after skip=0.9em,
+  },
+}
+% amsthm's default end-of-proof mark is drawn from rules and never reaches the PDF text
+% layer. Use the open square the book has always used, which is a real glyph.
+\renewcommand*{\qedsymbol}{\(\Box\)}
+\newtheoremstyle{ctplain}{0.8em}{0.8em}{}{}{\bfseries}{.}{0.5em}{}
+\newtheoremstyle{ctresult}{0.8em}{0.8em}{\itshape}{}{\bfseries}{.}{0.5em}{}
+
+\theoremstyle{ctplain}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+\newtheorem*{remark}{Remark}
+
+\theoremstyle{ctresult}
+\newtheorem{ctheorem}{Theorem}[chapter]
+\newtheorem{clemma}{Lemma}[chapter]
+\newtheorem{ccorollary}{Corollary}[chapter]
+\newtheorem{cproposition}{Proposition}[chapter]
+\newtheorem*{note}{Note}
+
+\NewDocumentEnvironment{theorem}{o}
+  {\begin{tcolorbox}[ctresult]\IfNoValueTF{#1}{\begin{ctheorem}}{\begin{ctheorem}[#1]}}
+  {\end{ctheorem}\end{tcolorbox}}
+\NewDocumentEnvironment{lemma}{o}
+  {\begin{tcolorbox}[ctresult]\IfNoValueTF{#1}{\begin{clemma}}{\begin{clemma}[#1]}}
+  {\end{clemma}\end{tcolorbox}}
+\NewDocumentEnvironment{corollary}{o}
+  {\begin{tcolorbox}[ctresult]\IfNoValueTF{#1}{\begin{ccorollary}}{\begin{ccorollary}[#1]}}
+  {\end{ccorollary}\end{tcolorbox}}
+\NewDocumentEnvironment{proposition}{o}
+  {\begin{tcolorbox}[ctresult]\IfNoValueTF{#1}{\begin{cproposition}}{\begin{cproposition}[#1]}}
+  {\end{cproposition}\end{tcolorbox}}
+
+% ---- Title page ----
+\makeatletter
+\renewcommand*{\maketitle}{%
+  \begin{titlepage}
+    \hypersetup{pageanchor=false}
+    \centering
+    \null\vspace{5em}
+    {\Huge\bfseries \@title\par}
+    \vspace{1.5em}
+    {\large Version \bookversion\par}
+    \vspace{3em}
+    \rule{\textwidth}{0.4pt}\par
+    \vspace{1.2em}
+    {\itshape \bookquote\par}
+    \vspace{1.2em}
+    \rule{\textwidth}{0.4pt}\par
+    \vfill
+    {\large \@author\par}
+    \vspace{0.6em}
+    {\large \@date\par}
+    \vspace{2em}
+  \end{titlepage}
+}
+\makeatother
 
 \begin{document}
 
@@ -33,20 +169,21 @@
 \frontmatter
 \tableofcontents
 
-\mainmatter
-
 % ============================================================
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
-
 \linespread{1.55}\selectfont
 
 Write why you took this subject on, whose course or book the tutorial follows, who it is
 for, and one piece of advice for the reader.
 
-\linespread{1.2}\selectfont
 
 % ============================================================
+
+\linespread{1.2}\selectfont
+
+\mainmatter
+
 \chapter{First Chapter}
 
 \subsection*{Overview}
