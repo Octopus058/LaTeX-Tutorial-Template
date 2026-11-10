@@ -13,6 +13,6 @@
 *.xdv
 
 # Compiled output
-# Never use *.pdf here: cover.pdf is a source file and has to stay tracked.
+
 # >>> rename this to your built PDF <<<
 tutorial.pdf

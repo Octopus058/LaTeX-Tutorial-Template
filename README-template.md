@@ -99,15 +99,15 @@ Three short paragraphs: requirements, command, cleanup. Do not put the page coun
 it changes.
 -->
 
-You need a TeX distribution with XeLaTeX. A **full** TeX Live installation is required
-rather than a minimal one. The document class is bundled in this repository, so there is
-nothing extra to install.
+You need a TeX distribution with LuaLaTeX. A **full** TeX Live installation is required
+rather than a minimal one. The `scrbook` class ships with the `koma-script` bundle, which is
+part of TeX Live.
 
 ```bash
 latexmk
 ```
 
-A `.latexmkrc` is included, so `latexmk` selects XeLaTeX automatically and runs as many
+A `.latexmkrc` is included, so `latexmk` selects LuaLaTeX automatically and runs as many
 passes as the cross-references need.
 
 ```bash
@@ -126,8 +126,6 @@ Optimization and Compressed Sensing kept it. Either is fine.
 
 ```
 Title of the Tutorial.tex   the tutorial itself
-cover.tex, cover.pdf        the cover drawing and its render
-elegantbook.cls             document class
 assets/                     figures used in the text
 .latexmkrc, .gitignore      build configuration
 ```
