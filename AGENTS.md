@@ -88,6 +88,11 @@ Where the two disagree, Information Theory wins on anything the compiler reads, 
 \addbibresource{refs.bib}
 \usepackage[headsepline]{scrlayer-scrpage}
 \usepackage[hidelinks]{hyperref}
+% scrbook, like book, sets \@afterindentfalse, so the first paragraph after a heading sits
+% flush with the margin while every later one is indented. elegantbook used to supply
+% \RequirePackage{indentfirst} and the tutorials were typeset that way, so the package has to
+% be named here or the look is lost the next time the class is replaced.
+\usepackage{indentfirst}
 
 % ---- Running heads ----
 % The section title sits above a thin rule on the right, the page number at the foot.
@@ -255,9 +260,10 @@ $pdf_mode = 4;    # 4 = lualatex
 **LuaLaTeX is the engine for every tutorial**, and this file is the only place that decides it.
 XeLaTeX loads `fontspec` just as well, so the two agree on fonts; they differ in pagination, and that difference is large enough to matter.
 
-The four older tutorials are still on XeLaTeX — their `.latexmkrc` says `$pdf_mode = 5` — so porting them means changing that line to 4 as well as replacing the preamble.
-**Expect the page count to move.**
-`latexmk -C`, rebuild, and write down the new number before touching the README or the release notes, because both quote it.
+The four older tutorials were on XeLaTeX until they were ported on 2026-11-10; all four say `$pdf_mode = 4` now, like this book.
+A new tutorial copies the file and changes only the filename, so the engine never has to be chosen again.
+**Expect the page count to move if the engine ever changes.**
+`latexmk -C`, rebuild, and write the new number into the release notes.
 
 ### `.gitignore` — copy verbatim, change the output name at the bottom
 
@@ -297,7 +303,10 @@ See **§0.1 My voice** below for the metrics.
 
 ### README shape
 
-Centred title + one-line description + `**Version x.y** · date · N pages`, then: `About` → `Who this is for` → `Contents` (grouped by part, 3–5 lines per chapter) → `What this tutorial does not cover` → `Building the PDF` → `Repository layout` → `Acknowledgements` → `License`.
+Centred title + one-line description, then: `About` → `Who this is for` → `Contents` (grouped by part, 3–5 lines per chapter) → `What this tutorial does not cover` → `Building the PDF` → `Repository layout` → `Acknowledgements` → `License`.
+One sentence per line, as in the `.tex` files.
+**No version line and no page count.**
+The page count changes with every edit, and a README that quotes it goes stale without anyone noticing; `README-template.md` says the same.
 
 ### Commit messages
 
@@ -366,12 +375,13 @@ Measured baselines differ between tutorials:
 | Convex Optimization | 18.4 |
 | Linear Algebra | 18.4 |
 | Compressed Sensing | **23.1** |
-| Information Theory | **16.4** |
+| Information Theory | **16.3** |
 
 Writing 18-word prose into Compressed Sensing makes the new text 22% shorter than its surroundings, which reads as a different author just as surely as writing 26-word prose into Convex.
 **Measure the target document first**, then aim at that number.
 The other two metrics (em-dashes, semicolons) are low in every tutorial and carry over unchanged.
-Information Theory measured 16.4 across its nine overviews (97 sentences, 1589 words), and its chapter 9 body prose measured 15.9, so new text there aims at 16 rather than at the Convex 18.
+Information Theory measured 16.3 across its nine overviews (103 sentences, 1675 words), and its chapter 9 body prose measured 15.9, so new text there aims at 16 rather than at the Convex 18.
+The ninth overview was written last, after the other eight had set the level.
 
 Expect to iterate.
 When I rewrote 8 chapter overviews for Convex, the first attempt came out at 22.8 words/sentence and the second at 11.6 — one overshoot in each direction before landing on 17.9.
@@ -569,10 +579,8 @@ The mismatch is easy to miss because the reference itself resolves without error
 **Both lines are gone from the template as of 2026-10-09.** Numbered captions and working `\figref` references are the house standard, so no tutorial keeps `labelformat=empty` any longer.
 Dropping the pair changes nothing else: the caption still renders, the reference still resolves, and the page count is unchanged.
 
-One thing this leaves behind:
-
-- **The four finished tutorials still ship the line.** It is harmless where nothing is cross-referenced, so this is a consistency debt rather than a bug.
-  Fix each one the next time it is touched, rather than in a sweep.
+Compressed Sensing and Linear Algebra both carried the pair, and both lost it in the 2026-11-10 port.
+Convex never had it, and Linux is out of scope here, so the debt is paid.
 
 ### 0.7 House conventions for the source itself
 
@@ -584,8 +592,8 @@ The preamble follows the same rule: one option or one comment per line.
 **Mark a term the first time it is defined, and mark it with `\emph{}`.**
 Inside a `definition` and outside it, the first occurrence carries the emphasis: `the \emph{type} $P_{x^n}$`, `Such a channel is said to be \emph{symmetric}.`
 **Never use `\textbf` for a term.**
-The four older tutorials do exactly that — `\textbf{projection matrix}`, `\textbf{orthogonal complement}`, `\textbf{Examples}` — so this is a convention that changed rather than one that was always there.
-§5 converts them on the way past.
+The four older tutorials did exactly that until the 2026-11-10 port — `\textbf{projection matrix}`, `\textbf{orthogonal complement}`, `\textbf{Examples}` — so this is a convention that changed rather than one that was always there.
+§5 records how they were converted.
 Bold already means three things on these pages — `Figure 1.2` and `Table 1.1` from `\figref` and `\tabref`, the run-in head of a theorem, and the title on the title page — and a fourth meaning makes all four unreadable.
 Italics are the only free slot, and they are what Cover and Thomas use: measured with `pdftohtml`, `entropy` and `relative entropy` are set as `<i>` in their §2.1, while the same words stay roman in the §1.1 preview, where nothing is being defined yet.
 
@@ -680,7 +688,7 @@ git ls-files | grep -E '\.(aux|log|toc|out|synctex\.gz|fls|fdb_latexmk|bcf|blg|x
 
 Sections, in this order:
 
-1. Centred title + one-line description + `**Version x.y** · date · N pages`
+1. Centred title + one-line description
 2. **About** — what it is, what it follows, what makes it different
 3. **Who this is for** — prerequisites, and "development-first rather than proof-first; read Boyd alongside" if applicable
 4. **Contents** — grouped by part, each chapter with 3–5 lines of real description, not a one-line table row
@@ -696,7 +704,7 @@ A README is a different genre and may run slightly longer, but the em-dash disci
 
 Bump `\bookversion{}` and `\date{}` in the preamble.
 Check the title page renders them.
-If a README states a version and page count, update it too — or drop the version line from the README so it cannot drift.
+READMEs carry no version line and no page count, so there is nothing to keep in step there.
 
 ### Step 8 — Compile and verify
 
@@ -791,20 +799,25 @@ The first row is the standard; every other row is a target brought up to it.
 
 | Repo | State | Porting to `scrbook` |
 | --- | --- | --- |
-| **Introduction-to-Convex-Optimization** | ⬛ **THE EDITORIAL STANDARD** — v1.1 done; commit titles cleaned; release notes written for v1.0 and v1.1. `ad3e57a`, 3518 lines, 10 chapters, `elegantbook`, **0 theorem environments**, `\emph` 0, `\textbf` 99 | New preamble; delete `cover.tex`/`cover.pdf`; `pdf_mode` 5→4; convert `\textbf` (three kinds, see §5) |
+| **Introduction-to-Convex-Optimization** | ⬛ **THE EDITORIAL STANDARD** — v1.1 done; release notes written for v1.0 and v1.1. `ad3e57a`, 3518 lines, 10 chapters, **v1.3**. **Ported 2026-11-10**: `scrbook`, LuaLaTeX, **69 pages**, 0 errors / 0 undefined / 0 overfull, cover gone, 67 bold maths operators kept and 32 `\textbf` converted | ✅ done |
 | **Introduction-to-Linux** | ✅ v3.2 done; commit titles cleaned; CHANGELOG deleted. Its four old release bodies still say "see CHANGELOG" and now point at a file that is gone — they need replacing with the notes already drafted | **Out of scope** |
-| **Introduction-to-Compressed-Sensing** | ✅ v2.1 done, migrated from `ctexart`, 60 pages; commit titles cleaned; tag `v2.1` re-pointed. `5d08504`, 2245 lines, `elegantbook`, `xeCJK` **present**, `\emph` 0, `\textbf` 70, still ships `labelformat=empty` | New preamble **keeping `xeCJK`**; delete only the `\cover{assets/…png}` line — it has no cover files; `pdf_mode` 5→4; convert `\textbf` |
-| **Retracing-the-Path-of-Linear-Algebra** | ✅ v1.1 done, migrated, new TikZ cover, 38 pages. `9160092`, 2543 lines, 9 chapters, `elegantbook`, **0 theorem environments**, `\emph` 0, `\textbf` 56, still ships `labelformat=empty` | New preamble; delete `cover.tex`/`cover.pdf`; `pdf_mode` 5→4; convert `\textbf` |
-| **LaTeX-Tutorial-Template** | ✅ created and pushed 2026-10-01 — the starter kit. `abfc07b`, `tutorial.tex` 83 lines, `elegantbook`, and the guide inside is `CLAUDE.md`, 789 lines, written for `elegantbook` | **Rewrite, not port** — see §5 |
-| **Introduction-to-Information-Theory** | ✅ **9 chapters, 81 pages, `scrbook`**, 0 errors, 0 undefined references, 0 overfull boxes. The framework standard, and the source of the skeleton. No `.git` and not on GitHub yet | Nothing — this is the source |
+| **Introduction-to-Compressed-Sensing** | ✅ v2.1 done, migrated from `ctexart`; tag `v2.1` re-pointed. `5d08504`, 2245 lines, **v2.3**. **Ported 2026-11-10**: `scrbook`, LuaLaTeX, **48 pages**, 0/0/0, `xeCJK` replaced by `luatexja-fontspec`, 70 `\textbf` converted — **the only book whose Chinese survives, so keep the CJK block** | ✅ done |
+| **Retracing-the-Path-of-Linear-Algebra** | ✅ v1.1 done, migrated, new TikZ cover. `9160092`, 2543 lines, 9 chapters, **v1.3**. **Ported 2026-11-10**: `scrbook`, LuaLaTeX, **40 pages**, 0/0/0, cover gone, 56 `\textbf` converted, one `enumerate[(1)]` rewritten | ✅ done |
+| **LaTeX-Tutorial-Template** | ✅ created and pushed 2026-10-01 — the starter kit. `abfc07b`. **Rewritten 2026-11-10**: `tutorial.tex` is now the `scrbook` skeleton, the guide inside is `AGENTS.md` rather than `CLAUDE.md`, cover deleted, **5 pages** | ✅ done |
+| **Introduction-to-Information-Theory** | ✅ **9 chapters, 82 pages, `scrbook`**, 0 errors, 0 undefined references, 0 overfull boxes. The framework standard, and the source of the skeleton. README written, and all nine chapter overviews written. **Still empty: the Preface and the Afterwords, which are the skeleton placeholders, and there is no `.git`, so nothing is on GitHub** | Nothing — this is the source |
 
-**Three facts that decide the port, all measured rather than assumed:**
+**What the four ports were, in one line each** — `elegantbook` → `scrbook`, XeLaTeX → LuaLaTeX, cover deleted, class deleted, `\textbf` sorted three ways, `labelformat=empty` dropped.
 
-- **`\figref` and `\tabref` live inside the vendored `elegantbook.cls`.** They are not defined in any of the four `.tex` files. Deleting the class before the new preamble is in place takes `\figref` out from under the document.
-- **Not one of the four uses a theorem environment.** Convex, Linear Algebra and the Template use none at all; Compressed Sensing uses one `note`. The whole amsthm and `tcolorbox` apparatus therefore ports across **unused**, which is fine, and the seven traps in §0.5 cost nothing.
-- **`\textbf` is doing the term-marking job** — `\textbf{dom}` 58 times in Convex, `\textbf{projection matrix}`, `\textbf{orthogonal complement}`, `\textbf{Examples}`. §0.7 now says terms are `\emph`, so this is a real conversion, not a rename.
+All four then took a second commit, `update README`, because their READMEs still described the old engine and the bundled class.
+The Template took a third, `tidy the starter kit's placeholders`.
 
-**Settled:** the body size stays at **10pt** (this book: nine chapters, 81 pages, 159mm measure).
+**Three things that were only visible once the ports actually ran:**
+
+- **Every page count moved, and not in the same direction.** Convex 60 → **69** and Linear Algebra 38 → **40** grew; Compressed Sensing 60 → **48** shrank. The old figures are the ones this guide recorded before the port, so treat the deltas as indicative rather than exact. Nothing about `scrbook` predicts the sign: it is the same 10pt on the same 159mm measure, and the difference comes from the headings, the float placement and how the old books happened to break pages.
+- **`\figref` and `\tabref` lived inside the vendored class**, not in any `.tex`. Deleting `elegantbook.cls` before the preamble carries them takes every figure reference out at once — which is why §5 puts the preamble first.
+- **Nobody used a theorem environment.** Convex, Linear Algebra and the Template used none; Compressed Sensing used one `note`. The amsthm and `tcolorbox` block ports across unused, so the seven traps in §0.5 cost nothing on these four books.
+
+**Settled:** the body size stays at **10pt** (this book: nine chapters, 82 pages, 159mm measure).
 The table-of-contents leading and the Preface and Afterwords leading are settled too — the skeleton carries both.
 
 **Still open, one item:** whether stripping `\textbf` from heading lines belongs to the standard.
@@ -834,8 +847,25 @@ So `\setCJKmainfont` is undefined and any Chinese in the body **renders as nothi
 It just disappears, and the surrounding sentence reads as if a word were missing.
 
 Compressed Sensing and Linear Algebra both turned out to contain Chinese.
-Compressed Sensing genuinely needed it (`压缩感知` in the Preface, a Chinese bibliography entry) and required an explicit `\usepackage{xeCJK}` plus `\setCJKmainfont{Microsoft YaHei}`.
+Compressed Sensing genuinely needed it (`压缩感知` in the Preface, a Chinese bibliography entry).
 Linear Algebra's Chinese was all in preamble comments, so it needed nothing.
+
+**The obvious fix is the wrong one on LuaLaTeX.**
+`xeCJK` is XeTeX only. Loading it under LuaLaTeX stops the build dead:
+
+```
+! Critical Package xeCJK Error: The xeCJK package requires XeTeX to function.
+```
+
+The LuaLaTeX equivalent is `luatexja`, and it hooks into `fontspec` the same way:
+
+```latex
+\usepackage{luatexja-fontspec}
+\setmainjfont{Microsoft YaHei}
+```
+
+`\setmainjfont` replaces `\setCJKmainfont`, which `luatexja` does not provide.
+The roman font from `\setmainfont` is untouched, so the Latin text looks exactly as it did under XeTeX.
 
 Do not assume either way.
 Check with perl, not grep:
@@ -987,7 +1017,7 @@ Delete that file first and every `\figref` in the document becomes an undefined 
 4. **Rewrite `.latexmkrc`**: `$pdf_mode = 5` (XeLaTeX) becomes **4** (LuaLaTeX), and `@default_files` names the actual source file.
    Copy `.gitignore` across unchanged.
 5. **`latexmk -C`, then `latexmk`.** It must reach exit 0 before anything else is looked at.
-   **Record the new page count** — switching engine re-flows every paragraph, so it will not be the old number, and both the README and the release notes quote it.
+   **Record the new page count** — switching engine re-flows every paragraph, so it will not be the old number, and the release notes quote it.
 6. **Three greps on the log, each of which must be zero**: undefined references, `^Overfull`, and empty environments.
    An empty `\begin{definition}\end{definition}` raises no error at all; it prints a lone `Definition 9.7.` and stops there.
    Then the two checks the text layer cannot answer, both measured in §4: the grey panel spans the measure exactly, and every first-occurrence term is italic.
@@ -1001,6 +1031,11 @@ Delete that file first and every `\figref` in the document becomes an undefined 
 
    Convex has 99 `\textbf`, Compressed Sensing 70, Linear Algebra 56.
 
+   **Then sweep the headings again, and look at the short titles too.**
+   A `\textbf` that is not alone on its line — `\subsection{$PA = LU$ \textbf{, permutation matrix and transpose}}`, `\subsubsection[\textbf{Examples}]{...}` — misses rule two and gets converted to `\emph`, which then prints italic in the table of contents where a heading should not be.
+   The optional `[...]` argument is the one that is easy to forget: it *is* the table-of-contents text.
+   There were two such cases out of 225 conversions, and both were found only by scanning, not by reading.
+
 ### The Template is rewritten, not ported
 
 `LaTeX-Tutorial-Template` is the only repository where nothing survives as it stands.
@@ -1011,9 +1046,15 @@ Delete that file first and every `\figref` in the document becomes an undefined 
 - `cover.tex`, `cover.pdf` and `\cover{cover.pdf}` are deleted.
 - `README-template.md` stays, but check it for `\version` and other `elegantbook`-only commands.
 
+### Three more traps, all found by porting rather than by reading
+
+- **`\begin{enumerate}[(1)]` is `elegantbook` syntax, not `enumitem` syntax.** `elegantbook` loads `enumitem` with `shortlabels`, so a bare `[(1)]` means `label=(1)`. The house preamble does not pass `shortlabels`, and the same source then fails with `Package enumitem Error: (1) undefined.` Rewrite it as `\begin{enumerate}[label=(\arabic*)]` rather than widening the preamble; the file already uses the long form a few lines away.
+- **The indentation of the first paragraph after a heading is silently lost.** `scrbook` and `book` both set `\@afterindentfalse`, so that paragraph starts at the margin while every later one is indented. `elegantbook` was loading `indentfirst` for you, so deleting the class changes the look of every section opening in the book. The skeleton names `\usepackage{indentfirst}` for that reason; check one page with `pdftotext -bbox` rather than trusting the source — the paragraph should start at 81.96pt, not 72.00pt, on a 159mm measure with one-inch margins.
+- **`\pdftohtml -xml -stdout` still writes images to the current directory.** It extracts every figure as `<pdf basename>-<page>_<n>.png` beside the source, which in a repo looks like fifteen unexplained screenshots. Run it in a scratch directory, or delete the files afterwards.
+
 ### What each repo needs beyond the seven steps
 
-- **Compressed Sensing is the only one with a Chinese body text.** `scrbook` loads no CJK support, so carry `\usepackage{xeCJK}` and `\setCJKmainfont{Microsoft YaHei}` across from its current preamble, beside the font setup.
+- **Compressed Sensing is the only one with a Chinese body text.** `scrbook` loads no CJK support, so carry its CJK block across, which under LuaLaTeX means `\usepackage{luatexja-fontspec}` and `\setmainjfont{Microsoft YaHei}` rather than the `xeCJK` pair it shipped with.
   Without them every Chinese character disappears, with no warning.
 - **The other three need no extra package.**
 - **All four lose their colour.** `elegantbook` is loaded with `color=blue` and the covers are coloured TikZ drawings; after the port the books are black and white like this one, which is the point but is worth saying in each release note.
